@@ -1,48 +1,67 @@
-# LLM Time Series Anomaly Detection
-
+# LLMAD: Large Language Models can Deliver Accurate and Interpretable Time Series Anomaly Detection.
 
 ## Description
+This repository contains the code for the paper: "Large Language Models can Deliver Accurate and Interpretable Time Series Anomaly Detection." It demonstrates the use of Large Language Models (LLMs) to tackle the task of Time Series Anomaly Detection.
 
-Using LLM to solve Time Series Anomaly Detection task
+![LLMAD](assets/method.png)
 
 ## Table of Contents
 
 - [Installation](#installation)
 - [Usage](#usage)
+  - [Configuration](#configuration)
+  - [Running the Scripts](#running-the-scripts)
+    - [Yahoo Dataset](#yahoo-dataset)
+    - [WSD Dataset](#wsd-dataset)
+    - [KPI Dataset](#kpi-dataset)
 
 ## Installation
 
+To get started, clone the repository and install the necessary dependencies:
+
 ```shell
 cd LLM_AD
-pip install -U openai
-pip install -U fastdtw pandas numpy scipy
+pip install -U openai fastdtw pandas numpy scipy
 ```
 
 ## Usage
-| File Name | Description |
-|-----------|-------------|
-| run.py     | program entry | 
-| Prompt_template.py | The structure of prompt |
-| Eval/* | Compute Metric |
 
-## run 
-set config.yaml
+### Configuration
+
+Before running the scripts, set up your configuration file `config.yaml` with your OpenAI API details:
+
 ```yaml
-   openai:
-     api_key: "your-api-key"
-     base_url: "https://api.openai.com/v1"
+openai:
+  api_key: "your-api-key"
+  base_url: "https://api.openai.com/v1"
 ```
-### Yahoo
+
+### Running the Scripts
+
+Below are the commands to run the scripts for different datasets.
+
+#### Yahoo Dataset
+
 ```shell
 bash script/yahoo.sh
 ```
 
-### WSD
+#### WSD Dataset
+
 ```shell
 bash script/wsd.sh
 ```
 
-### KPI
+#### KPI Dataset
+
 ```shell
 bash script/kpi.sh
 ```
+
+## File Descriptions
+
+| File Name            | Description                        |
+|----------------------|------------------------------------|
+| `run.py`             | Program entry point                |
+| `Prompt_template.py` | Structure of the prompt            |
+| `Eval/*`             | Scripts to compute evaluation metrics|
