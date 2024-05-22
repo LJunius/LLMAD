@@ -1,0 +1,214 @@
+from Metric import *
+import argparse
+import os
+import pandas as pd
+import json
+
+
+
+def compute_metric_one(data, delay=7, num_threshold=300):
+    y_true = data['label'].tolist()
+    y_pred = data['predict'].tolist()
+    # if sum(y_pred) > num_threshold:
+        # print('origin label num:', sum(y_pred))
+        # y_pred = [0 for _ in y_pred]
+        
+    # 预测标签
+    
+    
+    if len(y_true) == 0:
+        return 0, 0, 0, 0, 0, 0
+    # print('len(y_true):', len(y_true))
+    # print('sum(y_pred):', sum(y_pred))
+    # adjust
+    adjust_y_pred, adjust_y_true = point_adjust(y_pred, y_true)
+    # adjust_y_pred, adjust_y_true = y_pred, y_true
+    # import pdb; pdb.set_trace()
+    # 使用自定义函数计算F1分数
+    score, precision, recall = calculate_f1(adjust_y_true, adjust_y_pred)
+
+    # print('adjust F1 Score:', score)
+    # print('Precision:', precision)
+    # print('Recall:', recall)
+    
+    y_pred = np.array(y_pred)
+    y_true = np.array(y_true)
+    delay_y_pred = get_range_proba(y_pred, y_true, delay=delay)
+    delay_score, delay_precision, delay_recall = calculate_f1(y_true, delay_y_pred)
+    return score, precision, recall, delay_score, delay_precision, delay_recall
+
+
+def compute_metric_multi(path, ignore=[], prefix=[], delay=7, num_threshold=400 ):
+    
+    folders = os.listdir(path)
+    all_datas = []
+    sub_res = {}
+    
+    for folder in folders:
+        
+        if folder in ignore:
+            continue
+        if len(prefix) > 0:
+            in_prefix = False
+            for pre in prefix:
+                if folder.startswith(pre):
+                    in_prefix = True
+                    break
+            if not in_prefix:
+                continue
+        # print(folder)
+        file_path = os.path.join(path, folder, 'predict.csv')
+        log_path = os.path.join(path, folder, 'log.csv')
+        # 判断文件是否存在
+        if not os.path.exists(file_path):
+            # print('file not exist:', file_path)
+            continue
+        data = pd.read_csv(file_path)
+        log_data = pd.read_csv(log_path)
+        
+        score, precision, recall, delay_score, delay_precision, delay_recall = compute_metric_one(data, delay=delay, num_threshold=num_threshold)
+        
+        # import pdb; pdb.set_trace()
+        # if 'confidence' in log_data.columns:
+        #     confidence = log_data['confidence'].tolist()
+        #     for i in range(len(confidence)):
+        #         if confidence[i] != 'VerySure' and confidence[i] != 'no':
+                    # print('confidence:', confidence[i])
+                    
+        
+        if 'scores' in log_data.columns:
+            n_sim = log_data['scores']
+            p_sim = log_data['ad_scores']
+            n_sim = [float(json.loads(x)[0]) for x in n_sim]
+            p_sim = [float(json.loads(x)[0]) for x in p_sim]
+            # 求平均
+            n_sim_ave = np.mean(n_sim)
+            p_sim_ave = np.mean(p_sim)
+        else :
+            n_sim_ave = 0
+            p_sim_ave = 0
+        
+        sub_res[folder] = {
+            'company': folder,
+            'num': len(data),
+            'label_anomaly_num': len(data[data['label'] == 1]),
+            'predict_anomaly_num': len(data[data['predict'] == 1]),
+            'best_f1': score,
+            'best_precision': precision,
+            'best_recall': recall,
+            'delay_f1': delay_score,
+            'delay_precision': delay_precision,
+            'delay_recall': delay_recall,
+            'n_sim_ave': n_sim_ave,
+            'p_sim_ave': p_sim_ave,
+        }
+        if sum(data['predict']) > num_threshold:
+            data['predict'] = [0 for _ in data['predict']]
+        # data['ad_len'] < num_threshold 则 data['predict'] = 0
+        # data['predict'] = [0 if x > num_threshold else data['predict'][i] for i, x in enumerate(data['ad_len'])]
+        
+        all_datas.append(data)
+    
+        
+    all_datas = pd.concat(all_datas)
+    # 真实标签
+    y_true = all_datas['label'].tolist()
+
+    # 预测标签
+    y_pred = all_datas['predict'].tolist()
+    # print('len(y_true):', len(y_true))
+    # adjust
+    adjust_y_pred, adjust_y_true = point_adjust(y_pred, y_true)
+    # adjust_y_pred, adjust_y_true = y_pred, y_true
+    # import pdb; pdb.set_trace()
+    # 使用自定义函数计算F1分数
+    score, precision, recall = calculate_f1(adjust_y_true, adjust_y_pred)
+
+    y_pred = np.array(y_pred)
+    y_true = np.array(y_true)
+    delay_y_pred = get_range_proba(y_pred, y_true, delay=delay)
+    delay_score, delay_precision, delay_recall = calculate_f1(y_true, delay_y_pred)
+    
+    sub_res['all'] = {
+        'company': 'all',
+        'num': len(all_datas),
+        'label_anomaly_num': len(all_datas[all_datas['label'] == 1]),
+        'predict_anomaly_num': len(all_datas[all_datas['predict'] == 1]),
+        'best_f1': score,
+        'best_precision': precision,
+        'best_recall': recall,
+        'delay_f1': delay_score,
+        'delay_precision': delay_precision,
+        'delay_recall': delay_recall,
+        'n_sim_ave': 0,
+        'p_sim_ave': 0,
+    }
+    # 保存结果
+    res = pd.DataFrame.from_dict(sub_res, orient='index')
+    res.to_csv(os.path.join(path, 'metric.csv'), index=False)
+    all_datas.to_csv(os.path.join(path, 'A4.csv'), index=False)
+    return score, precision, recall, delay_score, delay_precision, delay_recall
+
+
+def parse_args():
+    arg_parser = argparse.ArgumentParser()
+    arg_parser.add_argument('--path', type=str, default="result/Yahoo_50_prompt_71_prompt72_new_imlicity",required=False)
+    
+    return arg_parser.parse_args()
+
+if __name__ == '__main__':
+    args = parse_args()
+    path = args.path
+    # ignore = [
+    #     'testda10a69f-d836-3baa-ad40-3e548ecf1fbd','t55f8b8b8-b659-38df-b3df-e4a5a8a54bc9','test42d6616d-c9c5-370a-a8ba-17ead74f3114','testadb2fde9-8589-3f5b-a410-5fe14386c7af','test4d2af31a-9916-3d9f-8a8e-8a268a48c095'
+    # ]
+    ignore = []
+    ignore = [] 
+    # ignore = ['synthetic_55','synthetic_38','synthetic_4']
+    # prefix = ['s','r']
+    prefixs = ['real','s','A3','A4']
+    # prefixs = ['A3_17']
+    all_datas = []
+    for prefix in prefixs:
+        file = os.path.join(path, prefix+'.csv')
+        data = pd.read_csv(file)
+        all_datas.append(data)
+    all_datas = pd.concat(all_datas)
+    y_true = all_datas['label'].tolist()
+
+    # 预测标签
+    y_pred = all_datas['predict'].tolist()
+    # print('len(y_true):', len(y_true))
+    # adjust
+    adjust_y_pred, adjust_y_true = point_adjust(y_pred, y_true)
+    # adjust_y_pred, adjust_y_true = y_pred, y_true
+    # import pdb; pdb.set_trace()
+    # 使用自定义函数计算F1分数
+    score, precision, recall = calculate_f1(adjust_y_true, adjust_y_pred)
+    # compute_metric_multi(path, ignore=ignore)
+    
+    y_pred = np.array(y_pred)
+    y_true = np.array(y_true)
+    delay_y_pred = get_range_proba(y_pred, y_true, delay=7)
+    delay_score, delay_precision, delay_recall = calculate_f1(y_true, delay_y_pred)
+    
+    print('raw score')
+    print('adjust F1 Score:', score)
+    print('Precision:', precision)
+    print('Recall:', recall)
+    print('delay F1 Score:', delay_score)
+    print('delay Precision:', delay_precision)
+    print('delay Recall:', delay_recall)
+    res = {}
+    res['0'] = {
+        'adjust_F1': score,
+        'adjust_Precision': precision,
+        'adjust_Recall': recall,
+        'delay_F1': delay_score,
+        'delay_Precision': delay_precision,
+        'delay_Recall': delay_recall,
+    }
+    
+    res = pd.DataFrame.from_dict(res, orient='index')
+    res.to_csv(os.path.join(path, 'metric2.csv'), index=False)
+    
