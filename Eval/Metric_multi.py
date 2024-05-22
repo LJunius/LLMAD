@@ -23,12 +23,7 @@ def compute_metric_one(data, delay=7, num_threshold=300):
     adjust_y_pred, adjust_y_true = point_adjust(y_pred, y_true)
     # adjust_y_pred, adjust_y_true = y_pred, y_true
     # import pdb; pdb.set_trace()
-    # 使用自定义函数计算F1分数
     score, precision, recall = calculate_f1(adjust_y_true, adjust_y_pred)
-
-    # print('adjust F1 Score:', score)
-    # print('Precision:', precision)
-    # print('Recall:', recall)
     
     y_pred = np.array(y_pred)
     y_true = np.array(y_true)
@@ -55,12 +50,11 @@ def compute_metric_multi(path, ignore=[], type_ignore=[], type_only = "", prefix
                     break
             if not in_prefix:
                 continue
-        # print(folder)
+
         file_path = os.path.join(path, folder, 'predict.csv')
         log_path = os.path.join(path, folder, 'log.csv')
-        # 判断文件是否存在
+
         if not os.path.exists(file_path):
-            # print('file not exist:', file_path)
             continue
         data = pd.read_csv(file_path)
         log_data = pd.read_csv(log_path)
@@ -71,21 +65,12 @@ def compute_metric_multi(path, ignore=[], type_ignore=[], type_only = "", prefix
         if compute_all:    
             score, precision, recall, delay_score, delay_precision, delay_recall = compute_metric_one(data, delay=delay, num_threshold=num_threshold)
             
-            # import pdb; pdb.set_trace()
-            # if 'confidence' in log_data.columns:
-            #     confidence = log_data['confidence'].tolist()
-            #     for i in range(len(confidence)):
-            #         if confidence[i] != 'VerySure' and confidence[i] != 'no':
-                        # print('confidence:', confidence[i])
-                        
-            
             if 'scores' in log_data.columns:
                 n_sim = log_data['scores']
                 p_sim = log_data['ad_scores']
                 n_sim = [float(json.loads(x)[0]) for x in n_sim]
                 p_sim = [0,0]
-                # p_sim = [float(json.loads(x)) for x in p_sim]
-                # 求平均
+                
                 n_sim_ave = np.mean(n_sim)
                 p_sim_ave = np.mean(p_sim)
             else :
@@ -106,47 +91,36 @@ def compute_metric_multi(path, ignore=[], type_ignore=[], type_only = "", prefix
                 'n_sim_ave': n_sim_ave,
                 'p_sim_ave': p_sim_ave,
             }
-        # if sum(data['predict']) > num_threshold:
-        #     data['predict'] = [0 for _ in data['predict']]
-        # data['ad_len'] < num_threshold 则 data['predict'] = 0
         data['predict'] = [0 if x > num_threshold else data['predict'][i] for i, x in enumerate(data['ad_len'])]
         
         all_datas.append(data)
     
     all_datas = pd.concat(all_datas)
-    # anomaly_type小写
     
     type_only = type_only.lower()
     if type_only != "":
-        # 保留type_only类型的数据
-        # import pdb; pdb.set_trace()
         all_datas['anomaly_type'] = all_datas['anomaly_type'].str.lower()
         all_datas = all_datas[type_only == all_datas['anomaly_type']]
-        # 重新编号
+        
         all_datas = all_datas.reset_index(drop=True)
         if len(all_datas) == 0:
             return 0, 0, 0, 0, 0, 0, 0
         
-    # 真实标签
+    
     y_true = all_datas['label'].tolist()
 
-    # 预测标签
+    
     y_pred = all_datas['predict'].tolist()
-    # print('len(y_true):', len(y_true))
-    # adjust
+    
     adjust_y_pred, adjust_y_true = point_adjust(y_pred, y_true)
-    # adjust_y_pred, adjust_y_true = y_pred, y_true
-    # import pdb; pdb.set_trace()
-    # 使用自定义函数计算F1分数
+    
     score, precision, recall = calculate_f1(adjust_y_true, adjust_y_pred)
 
     y_pred = np.array(y_pred)
     y_true = np.array(y_true)
     delay_y_pred = get_range_proba(y_pred, y_true, delay=delay)
     delay_score, delay_precision, delay_recall = calculate_f1(y_true, delay_y_pred)
-    # event_f1 = EventF1PA()
-    # event_score, event_precision, event_recall, event_threshold = event_f1.calc(y_pred, y_true, 0)
-    # print('event_score:', event_score, 'event_precision:', event_precision, 'event_recall:', event_recall, 'event_threshold:', event_threshold)
+    
     company = 'all'
     if type_only != "":
         company = type_only
@@ -164,10 +138,10 @@ def compute_metric_multi(path, ignore=[], type_ignore=[], type_only = "", prefix
         'n_sim_ave': 0,
         'p_sim_ave': 0,
     }
-    # 保存结果
+    
     res = pd.DataFrame.from_dict(sub_res, orient='index')
     if type_only != "":
-        # 追加保存
+        
         res.to_csv(os.path.join(path, 'metric.csv'), mode='a', index=False, header=False)
     else:
         res.to_csv(os.path.join(path, 'metric.csv'), index=False)
@@ -192,11 +166,9 @@ if __name__ == '__main__':
 
     type_ignore = []
     ignore = []
-    # ignore = ['real_46'] 
-    # ignore = ['209','203','80',]
-    # prefix = []
+    
     prefix = []
-    # compute_metric_multi(path, ignore=ignore)
+    
     score, precision, recall, delay_score, delay_precision, delay_recall, right = compute_metric_multi(path, prefix=prefix, ignore=ignore, delay=7, num_threshold=10000, type_ignore=type_ignore)
     print('raw score')
     print('adjust F1 Score:', score)
@@ -206,9 +178,6 @@ if __name__ == '__main__':
     print('delay Precision:', delay_precision)
     print('delay Recall:', delay_recall)
     
-    
-
-    # exit(0)
     if right > 400:
         right = 400
     

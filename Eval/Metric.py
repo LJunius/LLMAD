@@ -2,16 +2,15 @@ import numpy as np
 import math
 
 def calculate_f1(y_true, y_pred):
-    # 计算TP, FP, FN
+    
     TP = sum((y_true[i] == 1 and y_pred[i] == 1) for i in range(len(y_true)))
     FP = sum((y_true[i] == 0 and y_pred[i] == 1) for i in range(len(y_true)))
     FN = sum((y_true[i] == 1 and y_pred[i] == 0) for i in range(len(y_true)))
 
-    # 计算Precision和Recall
     Precision = TP / (TP + FP) if (TP + FP) > 0 else 0
     Recall = TP / (TP + FN) if (TP + FN) > 0 else 0
     
-    # 计算F1分数
+
     F1 = 2 * (Precision * Recall) / (Precision + Recall) if (Precision + Recall) > 0 else 0
 
     return F1, Precision, Recall
@@ -170,14 +169,14 @@ class EventF1PA():
         return best_f1, precision, recall, threshold
 
 if __name__=='__main__':
-    # /lustre/S/zhangyang/lj/ts/CloudGPT-AOAI/LLM_AD/infer_result.csv
+    
     import pandas as pd
     
-    data = pd.read_csv('/lustre/S/zhangyang/lj/ts/GPTime/LLM_AD/exp_result/KPI_t847_prompt_13_400_trans005_r2.csv')
-    # 真实标签
+    data = pd.read_csv('exp_result/KPI_t847_prompt_13_400_trans005_r2.csv')
+    
     y_true = data['label'].tolist()
 
-    # 预测标签
+    
     y_pred = data['predict'].tolist()
     # y_true = [0,0,1,1,1,0,1,1,1,1]
     # y_pred = [1,0,0,1,1,0,0,0,1,1]
@@ -186,7 +185,6 @@ if __name__=='__main__':
     adjust_y_pred, adjust_y_true = point_adjust(y_pred, y_true)
     adjust_y_pred = [int(i) for i in adjust_y_pred]
     # import pdb; pdb.set_trace()
-    # 使用自定义函数计算F1分数
     score, precision, recall = calculate_f1(adjust_y_true, adjust_y_pred)
 
     print('adjust F1 Score:', score)
