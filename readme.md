@@ -26,6 +26,12 @@ pip install -U fastdtw pandas numpy scipy
 | Eval/* | Compute Metric |
 
 ## run 
+set config.yaml
+```yaml
+   openai:
+     api_key: "your-api-key"
+     base_url: "https://api.openai.com/v1"
+```
 ### Yahoo
 ```shell
 bash script/yahoo.sh
