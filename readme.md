@@ -14,6 +14,8 @@ This repository contains the code for the paper: "Large Language Models can Deli
     - [Yahoo Dataset](#yahoo-dataset)
     - [WSD Dataset](#wsd-dataset)
     - [KPI Dataset](#kpi-dataset)
+- [File Descriptions](#file-descriptions)
+
 
 ## Installation
 
@@ -65,3 +67,13 @@ bash script/kpi.sh
 | `run.py`             | Program entry point                |
 | `Prompt_template.py` | Structure of the prompt            |
 | `Eval/*`             | Scripts to compute evaluation metrics|
+
+If you find this repo helpful, please cite the following papers:
+```
+@article{liu2024large,
+  title={Large Language Models can Deliver Accurate and Interpretable Time Series Anomaly Detection},
+  author={Liu, Jun and Zhang, Chaoyun and Qian, Jiaxu and Ma, Minghua and Qin, Si and Bansal, Chetan and Lin, Qingwei and Rajmohan, Saravan and Zhang, Dongmei},
+  journal={arXiv preprint arXiv:2405.15370},
+  year={2024}
+}
+```
