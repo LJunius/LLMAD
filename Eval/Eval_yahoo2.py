@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from Metric import *
 import argparse
 import os
@@ -143,7 +146,7 @@ if __name__ == '__main__':
     ignore = [] 
     
     prefixs = ['real','s','A3','A4']
-    # prefixs = ['A3_17']
+    
     all_datas = []
     for prefix in prefixs:
         file = os.path.join(path, prefix+'.csv')

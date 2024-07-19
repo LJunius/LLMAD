@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from fastdtw import fastdtw
 from scipy.spatial.distance import euclidean
 import numpy as np

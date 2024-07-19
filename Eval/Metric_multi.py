@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from Metric import *
 import argparse
 import os
@@ -11,8 +14,6 @@ def compute_metric_one(data, delay=7, num_threshold=300):
     # if sum(y_pred) > num_threshold:
         # print('origin label num:', sum(y_pred))
         # y_pred = [0 for _ in y_pred]
-        
-    # 预测标签
     
     
     if len(y_true) == 0:

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 from Prompt_template import PromptTemplate
 import sys
 import argparse
@@ -13,13 +16,9 @@ sys.path.append('..')
 import yaml
 from openai import OpenAI
 
-# 读取 config.yaml 文件
 with open("config.yaml", "r") as file:
     config = yaml.safe_load(file)
 
-# 设置 OpenAI 的 API 密钥和 base URL
-# openai.api_key = config['openai']['api_key']
-# openai.api_base = config['openai']['base_url']
 client = OpenAI(
     # This is the default and can be omitted
     base_url=config['openai']['base_url'],

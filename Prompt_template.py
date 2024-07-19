@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
 import json
 import re
 
@@ -238,7 +241,7 @@ class PromptTemplate:
             2: prompt_template_KPI,
             3: prompt_template_Yahoo_1,
             4: prompt_template_Yahoo_2,
-            # 添加其他的模板变量名和对应的值
+            # add more prompt templates here
         }
         if prompt_mode not in prompt_templates:
             raise ValueError('Invalid prompt mode: %d' % prompt_mode)
