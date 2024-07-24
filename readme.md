@@ -1,7 +1,7 @@
 # LLMAD: Large Language Models can Deliver Accurate and Interpretable Time Series Anomaly Detection.
 
 ## Description
-This repository contains the code for the paper: "Large Language Models can Deliver Accurate and Interpretable Time Series Anomaly Detection." It demonstrates the use of Large Language Models (LLMs) to tackle the task of Time Series Anomaly Detection.
+This repository contains the code for the paper: ["Large Language Models can Deliver Accurate and Interpretable Time Series Anomaly Detection"](https://arxiv.org/abs/2405.15370). It demonstrates the use of Large Language Models (LLMs) to tackle the task of Time Series Anomaly Detection.
 
 ![LLMAD](assets/method.png)
 
