@@ -69,11 +69,3 @@ bash script/kpi.sh
 | `Eval/*`             | Scripts to compute evaluation metrics|
 
 If you find this repo helpful, please cite the following papers:
-```
-@article{liu2024large,
-  title={Large Language Models can Deliver Accurate and Interpretable Time Series Anomaly Detection},
-  author={Liu, Jun and Zhang, Chaoyun and Qian, Jiaxu and Ma, Minghua and Qin, Si and Bansal, Chetan and Lin, Qingwei and Rajmohan, Saravan and Zhang, Dongmei},
-  journal={arXiv preprint arXiv:2405.15370},
-  year={2024}
-}
-```
